@@ -1,0 +1,6 @@
+/vendor
+/nbproject
+/cache
+fluxo.txt
+composer.lock
+script.php

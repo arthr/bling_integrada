@@ -1,0 +1,19 @@
+{
+    "name": "arthr/lojaintegrada_bling",
+    "description": "Integração Loja Integrada -> Bling [Projeto: Workana]",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Arthur Morais",
+            "email": "arthrmrs@gmail.com"
+        }
+    ],
+    "require": {
+        "phpfastcache/phpfastcache": "^6.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "lib/App"
+        }
+    }
+}
