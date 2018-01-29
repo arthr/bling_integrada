@@ -1,6 +1,7 @@
 /vendor
 /nbproject
 /cache
+/logs
 fluxo.txt
 composer.lock
 script.php
