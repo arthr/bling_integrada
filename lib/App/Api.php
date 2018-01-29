@@ -24,8 +24,7 @@ class Api
     public function __construct($headers = null)
     {
         $this->_headers = $headers;
-        $this->_ch = curl_init();
-        self::headerAppend();
+        self::init();
     }
 
     private function headerAppend()
@@ -33,8 +32,15 @@ class Api
         is_null($this->_headers) ?: curl_setopt($this->_ch, CURLOPT_HTTPHEADER, $this->_headers);
     }
 
+    private function init()
+    {
+        $this->_ch = curl_init();
+        self::headerAppend();
+    }
+
     protected function get($url, $params = null)
     {
+        self::init();
         $this->url = $url;
         curl_setopt($this->_ch, CURLOPT_HTTPGET, true);
         if (is_array($params)) {
@@ -46,6 +52,7 @@ class Api
 
     protected function post($url, $params = null)
     {
+        self::init();
         $this->url = $url;
         curl_setopt($this->_ch, CURLOPT_POST, true);
         if (is_array($params)) {
