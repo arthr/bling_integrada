@@ -9,7 +9,8 @@
         }
     ],
     "require": {
-        "phpfastcache/phpfastcache": "^6.0"
+        "phpfastcache/phpfastcache": "^6.0",
+        "monolog/monolog": "^1.23"
     },
     "autoload": {
         "psr-4": {

@@ -10,6 +10,8 @@ const EM_PRODUCAO = 17;
 #imports
 use App\Bling;
 use App\LojaIntegrada;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger; // gestor de logs
 use phpFastCache\CacheManager; // gestor de cache
 
 #configuração do gestor de cache
@@ -17,6 +19,10 @@ CacheManager::setDefaultConfig([
     'path' => './cache',
 ]);
 $ic = CacheManager::getInstance('files');
+
+#configuração do gestor de logs
+$log = new Logger('pedidos');
+$log->pushHandler(new StreamHandler('./logs/pedidos.log', Logger::WARNING));
 
 #incialização das Api's Loja Integrada e Bling
 $integrada = new LojaIntegrada();
@@ -38,6 +44,7 @@ if (is_null($separacaoC->get())) {
 if (is_null($producaoC->get())) {
     $pedidos = $integrada->getPedidos([
         'situacao_id' => EM_PRODUCAO,
+        'limit' => 500,
     ]);
     $producaoC->set($pedidos)->expiresAfter(3600);
     $ic->save($producaoC);
@@ -45,9 +52,52 @@ if (is_null($producaoC->get())) {
 
 $separacao = $separacaoC->get();
 $producao = $producaoC->get();
+$pedidosLojaIntegrada = array_merge($separacao->objects, $producao->objects);
 #fim da consulta [pedidos armazenados em: $separacao, $producao]
 
-$pedidosBling = $bling->getPedidos();
+#inicio da consulta e atualização de pedidos na Bling
+$pedidosBlingC = $ic->getItem('bling');
+if (is_null($pedidosBlingC->get())) {
+    $pedidosBlingA = [];
+    $filtros = [
+        'filters' => 'dataEmissao[28/12/2017 TO 28/01/2018]',
+        'page' => 0,
+    ];
 
+    $hasPage = true;
+
+    while ($hasPage) {
+        $getBling = $bling->getPedidos($filtros);
+        if (isset($getBling->retorno->erros)) {
+            $hasPage = false;
+        } else {
+            $filtros['page']++;
+            $pedidosBlingA = array_merge($pedidosBlingA, $getBling->retorno->pedidos);
+        }
+    }
+
+    $pedidosBlingC->set($pedidosBlingA)->expiresAfter(3600);
+    $ic->save($pedidosBlingC);
+}
+
+$pedidosBling = $pedidosBlingC->get();
+
+$pedidos = [];
+
+foreach ($pedidosBling as $pbling) {
+    $p = array_filter($pedidosLojaIntegrada, function ($obj) use ($pbling) {
+        if (isset($pbling->pedido->numeroPedidoLoja)) {
+            return ((int) $obj->numero == (int) $pbling->pedido->numeroPedidoLoja);
+        }
+        return false;
+    });    
+
+    $p = array_values($p);
+
+    if (count($p) && isset($p[0]->numero)) {        
+        $log->warn('Order Found: Bling ID: ' . $pbling->pedido->numero . ' - Loja ID:' . $p[0]->numero);
+        $pedidos = array_merge($pedidos, $p);
+    }
+}
 echo '<pre>';
-var_dump($pedidosBling);
+var_dump(count($pedidos));
