@@ -22,7 +22,7 @@ $ic = CacheManager::getInstance('files');
 
 #configuração do gestor de logs
 $log = new Logger('pedidos');
-$log->pushHandler(new StreamHandler('./logs/pedidos.log', Logger::WARNING));
+$log->pushHandler(new StreamHandler('./logs/pedidos.log', Logger::INFO));
 
 #incialização das Api's Loja Integrada e Bling
 $integrada = new LojaIntegrada();
@@ -90,14 +90,18 @@ foreach ($pedidosBling as $pbling) {
             return ((int) $obj->numero == (int) $pbling->pedido->numeroPedidoLoja);
         }
         return false;
-    });    
+    });
 
     $p = array_values($p);
+    @$p[0]->bling_id = ($pbling instanceof stdClass) ? $pbling->pedido->numero : false;
 
-    if (count($p) && isset($p[0]->numero)) {        
-        $log->warn('Order Found: Bling ID: ' . $pbling->pedido->numero . ' - Loja ID:' . $p[0]->numero);
+    if (count($p) && isset($p[0]->numero)) {
         $pedidos = array_merge($pedidos, $p);
     }
 }
+
 echo '<pre>';
-var_dump(count($pedidos));
+foreach($pedidos as $pedido) {
+    var_dump($pedido);
+    // $log->info('Pedido Bling ID: ' . $pbling->pedido->numero . ' - Loja ID:' . $p[0]->numero . ' :: ATUALIZADO DE ' . $p[0]->situacao->codigo . ' PARA enviado');
+}
