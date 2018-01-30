@@ -33,6 +33,9 @@ $log->pushHandler(new StreamHandler('./logs/pedidos.log', Logger::INFO));
 $integrada = new LojaIntegrada();
 $bling = new Bling();
 
+#inicialização WebService Correios
+$correios = new Correios();
+
 #inicio da consulta de pedidos na Loja Integrada
 $pedidosC = $ic->getItem('pedidos');
 $separacaoC = $ic->getItem('separacao');
@@ -143,6 +146,7 @@ $comRastreio = array_filter($pedidos, function ($p) {
 });
 
 echo '<pre>';
+
 // var_dump($comRastreio);
 // $idPedido = 30584;
 // $filtr = array_filter($comRastreio, function ($p) use ($idPedido) {
@@ -159,7 +163,21 @@ echo '<pre>';
 // $pedido = $integrada->getPedido($idPedido);
 // var_dump($r);
 // var_dump($iPedido);
-$correios = new Correios();
-$rastreio = $correios->rastrearObjeto('OA709275324BR');
-var_dump($rastreio);
+
+foreach ($comRastreio as $objeto) {
+    $envioId = $objeto->envio_id;
+    $codigoRastreio = $objeto->codigo_rastreio;
+    $pedidoId = $objeto->numero;
+
+    $rastreio = $correios->rastrearObjeto($codigoRastreio);
+    
+    if (!isset($rastreio->erro)) {
+        $ras = $integrada->atualizaRastreio($envioId, $codigoRastreio);
+        $sit = $integrada->atualizaSituacao($pedidoId);
+        $pedido = $integrada->getPedido($pedidoId);
+        var_dump($pedido);
+        die;
+    }
+}
+
 // $log->info('Pedido Bling ID: ' . $pbling->pedido->numero . ' - Loja ID:' . $p[0]->numero . ' :: ATUALIZADO DE ' . $p[0]->situacao->codigo . ' PARA enviado');

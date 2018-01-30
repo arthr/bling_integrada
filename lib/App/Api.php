@@ -78,6 +78,9 @@ class Api
                 'Content-Length: ' . strlen($data),
             ];
         } else {
+            $this->_headers = array_filter($this->_headers, function ($h) {
+                return (strpos($h, 'Content-Length:') === false);
+            });
             $this->_headers[] = 'Content-Length: ' . strlen($data);
         }
 

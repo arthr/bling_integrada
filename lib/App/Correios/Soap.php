@@ -151,11 +151,12 @@ class Soap
 
         $client = new \SoapClient(self::$wsdl, [
             'stream_context' => stream_context_create(
-                array('http' => array(
-                    'protocol_version' => '1.0'
-                    , 'header' => 'Connection: Close',
-                ),
-                )
+                [
+                    'http' => [
+                        'protocol_version' => '1.0'
+                        , 'header' => 'Connection: Close',
+                    ],
+                ]
             ),
         ]);
         $eventos = $client->buscaEventos($_evento);

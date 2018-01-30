@@ -60,6 +60,13 @@ class LojaIntegrada extends Api
         return $this->put($url, $data);
     }
 
+    public function atualizaSituacao($pedidoId)
+    {
+        $url = $this->urlApi . $this->urlAttSituacao . $pedidoId;
+        $data = ['codigo' => 'pedido_enviado'];
+        return $this->put($url, $data);
+    }
+
     private function format($data)
     {
         return ($this->_json) ? $data : json_decode($data);
