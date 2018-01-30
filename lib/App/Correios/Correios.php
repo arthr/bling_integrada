@@ -25,14 +25,14 @@ class Correios extends Soap
             'pass' => $this->senha,
             'tipo' => $this->tipo,
             'resultado' => $this->resultado,
-            'idioma' => $this->lingua,
+            'idioma' => $this->lingua
         ];
-        parent::init($params);
+        $this->init($params);
     }
 
     public function rastrearObjeto($objeto)
     {
-        return parent::get($objeto);
+        return $this->get($objeto);
     }
 
 }

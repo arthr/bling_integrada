@@ -21,6 +21,12 @@ class Soap
     private static $wsdl = null;
 
     /**
+     * Path para arquivo WSDL cacheado.
+     * @var string
+     */
+    private static $path = null;
+
+    /**
      * Seu nome único de usuário para acesso a API
      * Normalmente obtido na agência de sua cidade
      * @var string
@@ -76,7 +82,7 @@ class Soap
      * agencia mais proxima e solicite as credências para utilizar
      * o sistema.
      *
-     * Mesmo que não tenha os dados de login, esta classe irpa funcionar
+     * Mesmo que não tenha os dados de login, esta classe ira funcionar
      * com Credenciais que são utilizadas como teste.
      *
      * @param array $_param - Matriz contendo os dados de login e
@@ -95,7 +101,8 @@ class Soap
      */
     public static function init($_params = array())
     {
-        self::$wsdl = isset($_params['wsdl']) ? $_params['wsdl'] : "http://webservice.correios.com.br/service/rastro/Rastro.wsdl";
+        self::$wsdl = isset($_params['wsdl']) ? $_params['wsdl'] : "https://webservice.correios.com.br/service/rastro/Rastro.wsdl";
+        self::$path = isset($_params['path']) ? $_params['path'] : null;
         self::$user = isset($_params['user']) ? $_params['user'] : "ECT";
         self::$pass = isset($_params['pass']) ? $_params['pass'] : "SRO";
         self::$tipo = isset($_params['tipo']) ? $_params['tipo'] : "L";
@@ -142,7 +149,15 @@ class Soap
             'objetos' => trim($__codigo__),
         );
 
-        $client = new SoapClient(self::$wsdl);
+        $client = new \SoapClient(self::$wsdl, [
+            'stream_context' => stream_context_create(
+                array('http' => array(
+                    'protocol_version' => '1.0'
+                    , 'header' => 'Connection: Close',
+                ),
+                )
+            ),
+        ]);
         $eventos = $client->buscaEventos($_evento);
 
         // sempre retorna objeto por padrao, mesmo em caso de erros.
