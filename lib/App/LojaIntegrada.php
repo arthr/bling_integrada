@@ -53,6 +53,13 @@ class LojaIntegrada extends Api
         return self::format($this->get($url));
     }
 
+    public function atualizaRastreio($envioId, $rastreio)
+    {
+        $url = $this->urlApi . $this->urlAttRastreio . $envioId;
+        $data = ['objeto' => $rastreio];
+        return $this->put($url, $data);
+    }
+
     private function format($data)
     {
         return ($this->_json) ? $data : json_decode($data);

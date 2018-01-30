@@ -42,7 +42,9 @@ class Api
     {
         self::init();
         $this->url = $url;
+
         curl_setopt($this->_ch, CURLOPT_HTTPGET, true);
+
         if (is_array($params)) {
             $this->url = sprintf("%s?%s", $this->url, http_build_query($params));
         }
@@ -54,10 +56,34 @@ class Api
     {
         self::init();
         $this->url = $url;
+
         curl_setopt($this->_ch, CURLOPT_POST, true);
+
         if (is_array($params)) {
             curl_setopt($this->_ch, CURLOPT_POSTFIELDS, $params);
         }
+
+        return self::exec();
+    }
+
+    protected function put($url, array $params)
+    {
+        self::init();
+        $this->url = $url;
+
+        $data = json_encode($params);
+        if (is_null($this->_headers)) {
+            $this->_headers = [
+                'Content-Type: application/json',
+                'Content-Length: ' . strlen($data),
+            ];
+        } else {
+            $this->_headers[] = 'Content-Length: ' . strlen($data);
+        }
+
+        curl_setopt($this->_ch, CURLOPT_HTTPHEADER, $this->_headers);
+        curl_setopt($this->_ch, CURLOPT_PUT, true);
+        curl_setopt($this->_ch, CURLOPT_POSTFIELDS, $data);
 
         return self::exec();
     }
@@ -71,7 +97,9 @@ class Api
         $r = curl_exec($this->_ch);
 
         if (false === $r) {
-            throw new Exception(curl_error($this->_ch), curl_errno($this->_ch));
+            // Caso ocorra algum erro de consulta CURL, invoca um Exception.
+            throw new \Exception(curl_error($this->_ch), curl_errno($this->_ch));
+            //TODO: Enviar notificação de erro no script
         }
 
         curl_close($this->_ch);
