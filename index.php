@@ -128,12 +128,6 @@ if (is_null($pedidosC->get())) {
         $pLoja = $integrada->getPedido($pedido->numero);
         $envioId = $pLoja->envios[0]->id;
         $pedido->envio_id = $envioId;
-
-        //TODO: Gerar LOG? Remover ob_flush
-        echo ($k + 1) . ' - ';
-        flush();
-        ob_flush();
-
         usleep(500000); // sleep time 0.5s !! NÃO ALTERAR !!
     }
     #fim da consulta de envio_id - array $pedidos atualizada com os id's de envio;
