@@ -3,34 +3,36 @@
  * Classe para Consumo do webservice dos Correios
  * https://www.correios.com.br/para-voce/correios-de-a-a-z/pdf/rastreamento-de-objetos/manual_rastreamentoobjetosws.pdf
  */
-namespace App;
+namespace App\Correios;
 
-use App\Api;
+use App\Correios\Soap;
 
-class Correios extends Api
+class Correios extends Soap
 {
     private $usuario = 'ECT';
     private $senha = 'SRO';
     private $tipo = 'L';
     private $resultado = 'T';
     private $lingua = '101';
-
-    private $urlRastreio = 'http://webservice.correios.com.br/service/rastro/Rastro.wsdl';
+    private $soap;
 
     protected $objeto;
 
-    public function rastrearObjeto($objeto)
+    public function __construct()
     {
         $params = [
-            'usuario' => $this->usuario,
-            'senha' => $this->senha,
+            'user' => $this->usuario,
+            'pass' => $this->senha,
             'tipo' => $this->tipo,
             'resultado' => $this->resultado,
-            'lingua' => $this->lingua,
-            'objetos' => $objeto,
+            'idioma' => $this->lingua,
         ];
+        parent::init($params);
+    }
 
-        return $this->post($this->urlRastreio, $params);
+    public function rastrearObjeto($objeto)
+    {
+        return parent::get($objeto);
     }
 
 }

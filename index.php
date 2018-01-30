@@ -13,7 +13,7 @@ const DURACAO_CACHE = 7200;
 
 #imports
 use App\Bling;
-use App\Correios;
+use App\Correios\Correios;
 use App\LojaIntegrada;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger; // gestor de logs
