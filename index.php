@@ -69,8 +69,20 @@ if (is_null($pedidosC->get())) {
     $pedidosBlingC = $ic->getItem('bling');
     if (is_null($pedidosBlingC->get())) {
         $pedidosBlingA = [];
+        //definição do filtro dinâmico
+        end($pedidosLojaIntegrada);
+        $key = key($pedidosLojaIntegrada);
+
+        $dtIni = new DateTime($pedidosLojaIntegrada[0]->data_criacao);
+        $dtIni->add(new DateInterval('P1D'));
+
+        $dtEnd = new DateTime($pedidosLojaIntegrada[$key]->data_criacao);
+        $dtEnd->add(new DateInterval('P10D'));
+
+        $filtro = $dtIni->format('d/m/Y') . ' TO ' . $dtEnd->format('d/m/Y');
+
         $filtros = [
-            'filters' => 'dataEmissao[28/12/2017 TO 28/01/2018]', //TODO: Definir filtros dinâmicos
+            'filters' => "dataEmissao[$filter]",
             'page' => 0,
         ];
 
@@ -145,38 +157,22 @@ $comRastreio = array_filter($pedidos, function ($p) {
     return !empty($p->codigo_rastreio);
 });
 
-echo '<pre>';
-
-// var_dump($comRastreio);
-// $idPedido = 30584;
-// $filtr = array_filter($comRastreio, function ($p) use ($idPedido) {
-//     return ($p->numero == $idPedido);
-// });
-// sort($filtr);
-// $iPedido = $filtr[0];
-
-// $idEnvio = $iPedido->envio_id;
-// $rastreio = $iPedido->codigo_rastreio;
-// var_dump($idEnvio);
-// $r = $integrada->atualizaRastreio($idEnvio, '');
-
-// $pedido = $integrada->getPedido($idPedido);
-// var_dump($r);
-// var_dump($iPedido);
-
+#percorre os pedidos com código de rastreio e atualiza seus status
 foreach ($comRastreio as $objeto) {
     $envioId = $objeto->envio_id;
     $codigoRastreio = $objeto->codigo_rastreio;
     $pedidoId = $objeto->numero;
 
+    //Busca objeto na base dos correios
     $rastreio = $correios->rastrearObjeto($codigoRastreio);
-    
+
+    //Se o objeto for localizado ele atualiza a situação do pedido
     if (!isset($rastreio->erro)) {
         $ras = $integrada->atualizaRastreio($envioId, $codigoRastreio);
         $sit = $integrada->atualizaSituacao($pedidoId);
-        $pedido = $integrada->getPedido($pedidoId);
-        var_dump($pedido);
         die;
+    } else {
+
     }
 }
 
