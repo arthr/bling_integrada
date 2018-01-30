@@ -82,7 +82,7 @@ class Api
         }
 
         curl_setopt($this->_ch, CURLOPT_HTTPHEADER, $this->_headers);
-        curl_setopt($this->_ch, CURLOPT_PUT, true);
+        curl_setopt($this->_ch, CURLOPT_CUSTOMREQUEST, 'PUT');
         curl_setopt($this->_ch, CURLOPT_POSTFIELDS, $data);
 
         return self::exec();

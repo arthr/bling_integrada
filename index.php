@@ -10,6 +10,7 @@ const EM_PRODUCAO = 17;
 
 #imports
 use App\Bling;
+use App\Correios;
 use App\LojaIntegrada;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger; // gestor de logs
@@ -139,20 +140,22 @@ $comRastreio = array_filter($pedidos, function ($p) {
 
 echo '<pre>';
 // var_dump($comRastreio);
-$idPedido = 30584;
-$filtr = array_filter($comRastreio, function ($p) use ($idPedido) {
-    return ($p->numero == $idPedido);
-});
-sort($filtr);
-$iPedido = $filtr[0];
+// $idPedido = 30584;
+// $filtr = array_filter($comRastreio, function ($p) use ($idPedido) {
+//     return ($p->numero == $idPedido);
+// });
+// sort($filtr);
+// $iPedido = $filtr[0];
 
-$idEnvio = $iPedido->envio_id;
-$rastreio = $iPedido->codigo_rastreio;
-var_dump($idEnvio);
-$r = $integrada->atualizaRastreio($idEnvio, $rastreio);
+// $idEnvio = $iPedido->envio_id;
+// $rastreio = $iPedido->codigo_rastreio;
+// var_dump($idEnvio);
+// $r = $integrada->atualizaRastreio($idEnvio, '');
 
-$pedido = $integrada->getPedido($idPedido);
-var_dump($r);
-var_dump($pedido);
-
+// $pedido = $integrada->getPedido($idPedido);
+// var_dump($r);
+// var_dump($iPedido);
+$correios = new Correios();
+$rastreio = $correios->rastrearObjeto('OA709275324BR');
+var_dump($rastreio);
 // $log->info('Pedido Bling ID: ' . $pbling->pedido->numero . ' - Loja ID:' . $p[0]->numero . ' :: ATUALIZADO DE ' . $p[0]->situacao->codigo . ' PARA enviado');
