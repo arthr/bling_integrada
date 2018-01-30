@@ -8,6 +8,9 @@ const EM_SEPARACAO = 15;
 #constante global: Em Produção -> 17
 const EM_PRODUCAO = 17;
 
+#constante global: Duração do cache -> 7200ms = 2h
+const DURACAO_CACHE = 7200;
+
 #imports
 use App\Bling;
 use App\Correios;
@@ -41,7 +44,7 @@ if (is_null($pedidosC->get())) {
             'situacao_id' => EM_SEPARACAO,
             'limit' => 500,
         ]);
-        $separacaoC->set($pedidos)->expiresAfter(3600);
+        $separacaoC->set($pedidos)->expiresAfter(DURACAO_CACHE);
         $ic->save($separacaoC);
     }
 
@@ -50,7 +53,7 @@ if (is_null($pedidosC->get())) {
             'situacao_id' => EM_PRODUCAO,
             'limit' => 500,
         ]);
-        $producaoC->set($pedidos)->expiresAfter(3600);
+        $producaoC->set($pedidos)->expiresAfter(DURACAO_CACHE);
         $ic->save($producaoC);
     }
 
@@ -80,7 +83,7 @@ if (is_null($pedidosC->get())) {
             }
         }
 
-        $pedidosBlingC->set($pedidosBlingA)->expiresAfter(3600);
+        $pedidosBlingC->set($pedidosBlingA)->expiresAfter(DURACAO_CACHE);
         $ic->save($pedidosBlingC);
     }
 
@@ -113,6 +116,7 @@ if (is_null($pedidosC->get())) {
         $envioId = $pLoja->envios[0]->id;
         $pedido->envio_id = $envioId;
 
+        //TODO: Gerar LOG? Remover ob_flush
         echo ($k + 1) . ' - ';
         flush();
         ob_flush();
@@ -122,7 +126,7 @@ if (is_null($pedidosC->get())) {
     #fim da consulta de envio_id - array $pedidos atualizada com os id's de envio;
 
     #armazenando os dados em cache;
-    $pedidosC->set($pedidos)->expiresAfter(3600);
+    $pedidosC->set($pedidos)->expiresAfter(DURACAO_CACHE);
     $ic->save($pedidosC);
 }
 
