@@ -69,16 +69,14 @@ if (is_null($pedidosC->get())) {
     $pedidosBlingC = $ic->getItem('bling');
     if (is_null($pedidosBlingC->get())) {
         $pedidosBlingA = [];
+
         //definição do filtro dinâmico
         end($pedidosLojaIntegrada);
         $key = key($pedidosLojaIntegrada);
-
         $dtIni = new DateTime($pedidosLojaIntegrada[0]->data_criacao);
         $dtIni->add(new DateInterval('P1D'));
-
         $dtEnd = new DateTime($pedidosLojaIntegrada[$key]->data_criacao);
         $dtEnd->add(new DateInterval('P10D'));
-
         $filtro = $dtIni->format('d/m/Y') . ' TO ' . $dtEnd->format('d/m/Y');
 
         $filtros = [
