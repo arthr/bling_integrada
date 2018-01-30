@@ -30,7 +30,7 @@ class Correios extends Api
             'objetos' => $objeto,
         ];
 
-        return $this->post($this->url, $params);
+        return $this->post($this->urlRastreio, $params);
     }
 
 }
