@@ -60,7 +60,7 @@ class Api
         curl_setopt($this->_ch, CURLOPT_POST, true);
 
         if (is_array($params)) {
-            curl_setopt($this->_ch, CURLOPT_POSTFIELDS, http_build_query($params));
+            curl_setopt($this->_ch, CURLOPT_POSTFIELDS, $params);
         }
 
         return self::exec();
