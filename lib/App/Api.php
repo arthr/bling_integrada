@@ -13,6 +13,8 @@
  */
 namespace App;
 
+use App\Notifications\Logs;
+
 class Api
 {
     protected $url;
@@ -20,9 +22,12 @@ class Api
     private $_method;
     private $_headers;
     private $_ch;
+    private $_log;
 
     public function __construct($headers = null)
     {
+        $this->_log = new Logs();
+
         $this->_headers = $headers;
         self::init();
     }
@@ -101,8 +106,13 @@ class Api
 
         if (false === $r) {
             // Caso ocorra algum erro de consulta CURL, invoca um Exception.
-            throw new \Exception(curl_error($this->_ch), curl_errno($this->_ch));
-            //TODO: Enviar notificação de erro no script
+            // throw new \Exception(curl_error($this->_ch), curl_errno($this->_ch));
+            $this->_log->error('Ocorreu um erro na consulta da API.', [
+                'url' => $this->url,
+                'headers' => $this->_headers,
+                'curl_error' => curl_error($this->_ch),
+                'curl_errno' => curl_errno($this->_ch),
+            ]);
         }
 
         curl_close($this->_ch);

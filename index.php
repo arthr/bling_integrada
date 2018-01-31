@@ -3,6 +3,9 @@ ini_set('display_errors', true);
 set_time_limit(0);
 require_once './vendor/autoload.php';
 
+#constante diretório base
+const BASE_DIR = __DIR__;
+
 #constante global: Em Separação -> 15
 const EM_SEPARACAO = 15;
 #constante global: Em Produção -> 17
@@ -15,8 +18,8 @@ const DURACAO_CACHE = 7200;
 use App\Bling;
 use App\Correios\Correios;
 use App\LojaIntegrada;
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger; // gestor de logs
+use App\Notifications\Logs;
+use App\Notifications\Mailer;
 use phpFastCache\CacheManager; // gestor de cache
 
 #configuração do gestor de cache
@@ -25,9 +28,18 @@ CacheManager::setDefaultConfig([
 ]);
 $ic = CacheManager::getInstance('files');
 
-#configuração do gestor de logs
-$log = new Logger('pedidos');
-$log->pushHandler(new StreamHandler('./logs/pedidos.log', Logger::INFO));
+#inicialização gestor de logs
+$log = new Logs();
+
+#inicialização email service
+$configs = [
+    'host' => 'smtp.gmail.com',
+    'username' => 'exemplo@gmail.com',
+    'password' => 'suasenha',
+    'remetente' => 'Integração Loja Integrada - Bling',
+];
+
+$mail = new Mailer($configs);
 
 #incialização das Api's Loja Integrada e Bling
 $integrada = new LojaIntegrada();
@@ -62,8 +74,24 @@ if (is_null($pedidosC->get())) {
 
     $separacao = $separacaoC->get();
     $producao = $producaoC->get();
-    $pedidosLojaIntegrada = array_merge($separacao->objects, $producao->objects);
+
+    $separacao = isset($separacao->objescts) ? $separacao->objects : [];
+    $producao = isset($producao->objescts) ? $producao->objects : [];
+
+    $pedidosLojaIntegrada = array_merge($producao, $separacao);
     #fim da consulta [pedidos armazenados em: $separacao, $producao]
+
+    #se forem encontrados pedidos na loja integrada, a contagem é registrada.
+    #caso contrário, o script é interrompido e um registro informativo é criado.
+    if (count($pedidosLojaIntegrada)) {
+        $log->info('Foram localizados um total de ' . count($pedidosLojaIntegrada) . ' pedidos na Loja Integrada.');
+        $log->info(count($separacao) . ' pedidos em separação.');
+        $log->info(count($producao) . ' pedidos em produção.');
+    } else {
+        $log->info('Não forma localizados pedidos pendentes na Loja Integrada. O Script foi interrompido.');
+        $mail->notificar('0 Pedidos Processados', 'Não forma localizados pedidos pendentes na Loja Integrada. O Script foi interrompido.');
+        exit;
+    }
 
     #inicio da consulta de pedidos Bling
     $pedidosBlingC = $ic->getItem('bling');
@@ -114,6 +142,7 @@ if (is_null($pedidosC->get())) {
         });
 
         $p = array_values($p);
+
         @$p[0]->bling_id = $pbling->pedido->numero;
         @$p[0]->codigo_rastreio = $pbling->pedido->codigosRastreamento->codigoRastreamento;
 
@@ -144,6 +173,11 @@ $semRastreio = array_filter($pedidos, function ($p) {
     return empty($p->codigo_rastreio);
 });
 
+$log->info('Foram localizados um total de ' . count($semRastreio) . ' pedidos sem código de rastreio.');
+if (count($semRastreio)) {
+    $mail->notificar(count($semRastreio) . 'Pedidos sem Rastreio', 'Foram localizados um total de ' . count($semRastreio) . ' pedidos sem código de rastreio.');
+}
+
 #separa pedidos com código de rastreio disponível
 $comRastreio = array_filter($pedidos, function ($p) {
     return !empty($p->codigo_rastreio);
@@ -158,14 +192,13 @@ foreach ($comRastreio as $objeto) {
     //Busca objeto na base dos correios
     $rastreio = $correios->rastrearObjeto($codigoRastreio);
 
-    //Se o objeto for localizado ele atualiza a situação do pedido
-    if (!isset($rastreio->erro)) {
-        $ras = $integrada->atualizaRastreio($envioId, $codigoRastreio);
-        $sit = $integrada->atualizaSituacao($pedidoId);
-        die;
-    } else {
+    //Atualiza código de rastreio do pedido
+    $ras = $integrada->atualizaRastreio($envioId, $codigoRastreio);
 
+    //Se o objeto for localizado na base dos correios ele atualiza a situação do pedido
+    if (!isset($rastreio->erro)) {
+        $sit = $integrada->atualizaSituacao($pedidoId);
+    } else {
+        $log->notice("Objeto $codigoRastreio do pedido $pedidoId não localizado.");
     }
 }
-
-// $log->info('Pedido Bling ID: ' . $pbling->pedido->numero . ' - Loja ID:' . $p[0]->numero . ' :: ATUALIZADO DE ' . $p[0]->situacao->codigo . ' PARA enviado');
