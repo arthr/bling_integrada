@@ -2,6 +2,7 @@
 /nbproject
 /cache
 /logs
+.vscode
 fluxo.txt
 composer.lock
 script.php
