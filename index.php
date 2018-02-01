@@ -1,5 +1,6 @@
 <?php
 ini_set('display_errors', true);
+ini_set('error_reporting', E_ALL & ~E_NOTICE);
 set_time_limit(0);
 require_once './vendor/autoload.php';
 
