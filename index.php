@@ -114,7 +114,7 @@ if (is_null($pedidosC->get())) {
         $filtro = $dtIni->format('d/m/Y') . ' TO ' . $dtEnd->format('d/m/Y');
 
         $filtros = [
-            'filters' => "dataEmissao[$filter]",
+            'filters' => "dataEmissao[$filtro]",
             'page' => 0,
         ];
 
