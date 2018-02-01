@@ -24,7 +24,7 @@ use phpFastCache\CacheManager; // gestor de cache
 
 #configuração do gestor de cache
 CacheManager::setDefaultConfig([
-    'path' => './cache',
+    'path' => BASE_DIR . '/cache',
 ]);
 $ic = CacheManager::getInstance('files');
 
