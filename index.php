@@ -28,14 +28,19 @@ CacheManager::setDefaultConfig([
 ]);
 $ic = CacheManager::getInstance('files');
 
+#limpar cache manualmente
+if (isset($_GET['clearcache']) && $_GET['clearcache'] == 'true') {
+    $ic->clear();
+}
+
 #inicialização gestor de logs
 $log = new Logs();
 
 #inicialização email service
 $configs = [
     'host' => 'smtp.gmail.com',
-    'username' => 'exemplo@gmail.com',
-    'password' => 'suasenha',
+    'username' => 'arthr@gmail.com',
+    'password' => 'L0kin3ss90',
     'remetente' => 'Integração Loja Integrada - Bling',
 ];
 
@@ -59,6 +64,7 @@ if (is_null($pedidosC->get())) {
             'situacao_id' => EM_SEPARACAO,
             'limit' => 500,
         ]);
+
         $separacaoC->set($pedidos)->expiresAfter(DURACAO_CACHE);
         $ic->save($separacaoC);
     }
@@ -75,8 +81,8 @@ if (is_null($pedidosC->get())) {
     $separacao = $separacaoC->get();
     $producao = $producaoC->get();
 
-    $separacao = isset($separacao->objescts) ? $separacao->objects : [];
-    $producao = isset($producao->objescts) ? $producao->objects : [];
+    $separacao = isset($separacao->objects) ? $separacao->objects : [];
+    $producao = isset($producao->objects) ? $producao->objects : [];
 
     $pedidosLojaIntegrada = array_merge($producao, $separacao);
     #fim da consulta [pedidos armazenados em: $separacao, $producao]
