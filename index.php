@@ -39,9 +39,9 @@ $log = new Logs();
 #inicialização email service
 $configs = [
     'host' => 'smtp.gmail.com',
-    'username' => 'arthr@gmail.com',
-    'password' => 'L0kin3ss90',
-    'remetente' => 'Integração Loja Integrada - Bling',
+    'username' => 'debuggrobot@gmail.com',
+    'password' => '55465213',
+    'remetente' => 'Cronjob Loja Integrada - Bling',
 ];
 
 $mail = new Mailer($configs);
