@@ -182,13 +182,16 @@ $semRastreio = array_filter($pedidos, function ($p) {
 
 $log->info('Foram localizados um total de ' . count($semRastreio) . ' pedidos sem código de rastreio.');
 if (count($semRastreio)) {
-    $mail->notificar(count($semRastreio) . 'Pedidos sem Rastreio', 'Foram localizados um total de ' . count($semRastreio) . ' pedidos sem código de rastreio.');
+    $mail->notificar(count($semRastreio) . ' Pedidos sem Rastreio', 'Foram localizados um total de ' . count($semRastreio) . ' pedidos sem código de rastreio.');
 }
 
 #separa pedidos com código de rastreio disponível
 $comRastreio = array_filter($pedidos, function ($p) {
     return !empty($p->codigo_rastreio);
 });
+
+#contador de pedidos atualizados para enviado
+$enviados = 0;
 
 #percorre os pedidos com código de rastreio e atualiza seus status
 foreach ($comRastreio as $objeto) {
@@ -203,9 +206,12 @@ foreach ($comRastreio as $objeto) {
     $ras = $integrada->atualizaRastreio($envioId, $codigoRastreio);
 
     //Se o objeto for localizado na base dos correios ele atualiza a situação do pedido
-    if (!isset($rastreio->erro)) {
-        $sit = $integrada->atualizaSituacao($pedidoId);
-    } else {
+    if (isset($rastreio->erro)) {
         $log->notice("Objeto $codigoRastreio do pedido $pedidoId não localizado.");
+    } else {
+        $sit = $integrada->atualizaSituacao($pedidoId);
+        $enviados++;
     }
 }
+
+$log->info("Foram atualizados $enviados pedidos para a situação: Pedido Enviado.");
