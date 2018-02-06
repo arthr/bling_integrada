@@ -193,8 +193,6 @@ $comRastreio = array_filter($pedidos, function ($p) {
 #contador de pedidos atualizados para enviado
 $enviados = 0;
 
-echo '<pre>';
-
 #percorre os pedidos com código de rastreio e atualiza seus status
 foreach ($comRastreio as $objeto) {
     $envioId = $objeto->envio_id;
@@ -205,8 +203,7 @@ foreach ($comRastreio as $objeto) {
     $rastreio = $correios->rastrearObjeto($codigoRastreio);
 
     //Atualiza código de rastreio do pedido
-    // $ras = $integrada->atualizaRastreio($envioId, $codigoRastreio);
-
+    $ras = $integrada->atualizaRastreio($envioId, $codigoRastreio);
 
     //Se o objeto for localizado na base dos correios ele atualiza a situação do pedido
     if (isset($rastreio->erro)) {
